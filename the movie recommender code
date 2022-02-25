@@ -1,0 +1,46 @@
+import pandas as pd
+import numpy as np
+pip install sklearn
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.feature_extraction.text import CountVectorizer
+data=pd.read_csv("imdb machine learning.csv")
+columns = ["Title","Genre","Director","Producer","Writer","Cast","ID"]
+data[columns]
+data[columns].isnull().values.any() ##It resutrns false which means thatb there are no missing values
+
+def get_important_features(new_data): # function to combine values of important cplomns in a single string
+    important_features = []
+    for i in range(0,data.shape[0]):
+        important_features.append(new_data["Title"][i]+ " "+new_data["Genre"][i]+" "+new_data["Director"][i]+" "+new_data["Producer"][i]+" "+new_data["Writer"][i]+" "+new_data["Cast"][i])
+
+    return important_features
+    
+    data["important_features"] = get_important_features(data) #To create a column to hold the combined srtings ie miovie title and the other five
+
+data.head() # show the modified dataset
+ converter = CountVectorizer().fit_transform(data["important_features"]) #To convert text toa amtrix of token counts
+ 
+ 
+ cosine_matrix = cosine_similarity(converter) #get the cosine similarity matrix from the count matrix
+print(cosine_matrix) #print cosine matrix
+    
+cosine_matrix.shape #Get the shape of the cosine similarity matrix
+
+title  = "The Batman" #Get title of the movie that the user likes
+movie_id = data[data.Title == title]["ID"].values[0] #Find movies id
+
+scores=list(enumerate(cosine_matrix[movie_id])) #Create a list of the enumerations for the similarity score [(movie_id,similarity score,(...))]
+
+sorted_scores= sorted(scores,key = lambda x:x[1], reverse =True) # Sort the list
+sorted_scores = sorted_scores[1:]
+
+print(sorted_scores)
+
+j = 0
+print("The 3 most recommended movies to", title, "are:\n")
+for item in sorted_scores:
+    movie_title =data[data.ID == item[0]]["Title"].values[0]
+    print(j+1, movie_title)
+    j = j+1
+    if j>=3:
+     break 
